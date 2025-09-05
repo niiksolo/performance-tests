@@ -17,6 +17,7 @@ jobs:
 
       - name: Run JMeter test
         run: |
+          mkdir -p site/jmeter
           jmeter -n -t jmeter/users_test.jmx \
             -l jmeter/results.jtl \
             -e -o site/jmeter
@@ -31,15 +32,13 @@ jobs:
           sudo apt-get install -y k6
 
       - name: Run k6 test
-        run: k6 run --out json=k6/results/output.json k6/users_test.js
-
-      - name: Generate k6 HTML report
         run: |
-          pip install pandas matplotlib
-          python k6/results/parse_results.py
           mkdir -p site/k6
-          mv k6/results/report.html site/k6/index.html
+          mkdir -p k6/results
+          k6 run --out json=k6/results/output.json k6/users_test.js
+          cp k6/results/output.json site/k6/results.json
 
+      # --- Upload artifacts for GitHub Pages ---
       - name: Upload reports
         uses: actions/upload-pages-artifact@v3
         with:
