@@ -1,0 +1,47 @@
+name: Performance Tests
+
+on:
+  workflow_dispatch:     # запуск вручную
+  push:
+    branches: [ "main" ] # запуск при пуше в main
+
+jobs:
+  jmeter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install JMeter
+        run: sudo apt-get update && sudo apt-get install -y jmeter
+
+      - name: Run JMeter test
+        run: |
+          jmeter -n -t jmeter/users_test.jmx \
+            -l jmeter/results.jtl \
+            -e -o jmeter/reports
+
+      - name: Upload JMeter report
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: jmeter/reports
+
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Run k6 test
+        run: k6 run k6/users_test.js
+
+  deploy:
+    needs: jmeter
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy JMeter report to GitHub Pages
+        uses: actions/deploy-pages@v4

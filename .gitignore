@@ -1,0 +1,5 @@
+.idea/
+__pycache__/
+.log
+k6/results/output.json
+k6/results/report.html
