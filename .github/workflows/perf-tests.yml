@@ -1,16 +1,17 @@
 name: Performance Tests
 
 on:
-  workflow_dispatch:     # запуск вручную
+  workflow_dispatch:
   push:
-    branches: [ "main" ] # запуск при пуше в main
+    branches: [ "main" ]
 
 jobs:
-  jmeter:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      # --- JMeter ---
       - name: Install JMeter
         run: sudo apt-get update && sudo apt-get install -y jmeter
 
@@ -18,30 +19,39 @@ jobs:
         run: |
           jmeter -n -t jmeter/users_test.jmx \
             -l jmeter/results.jtl \
-            -e -o jmeter/reports
+            -e -o site/jmeter
 
-      - name: Upload JMeter report
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: jmeter/reports
-
-  k6:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
+      # --- k6 ---
       - name: Install k6
-        run: sudo apt-get update && sudo apt-get install -y k6
+        run: |
+          sudo gpg -k || true
+          curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/k6.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/k6.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
 
       - name: Run k6 test
-        run: k6 run k6/users_test.js
+        run: k6 run --out json=k6/results/output.json k6/users_test.js
+
+      - name: Generate k6 HTML report
+        run: |
+          pip install pandas matplotlib
+          python k6/parse_results.py
+          mkdir -p site/k6
+          mv k6/results/report.html site/k6/index.html
+
+      # --- Upload site artifact ---
+      - name: Upload reports
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
 
   deploy:
-    needs: jmeter
+    needs: tests
     runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
     steps:
-      - name: Deploy JMeter report to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
