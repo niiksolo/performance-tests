@@ -12,8 +12,12 @@ jobs:
       - uses: actions/checkout@v4
 
       # --- JMeter ---
-      - name: Install JMeter
-        run: sudo apt-get update && sudo apt-get install -y jmeter
+      - name: Install JMeter (latest)
+        run: |
+          wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xvzf apache-jmeter-5.6.3.tgz
+          mv apache-jmeter-5.6.3 /opt/jmeter
+          sudo ln -s /opt/jmeter/bin/jmeter /usr/local/bin/jmeter
 
       - name: Run JMeter test
         run: |
@@ -29,14 +33,18 @@ jobs:
           curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/k6.gpg
           echo "deb [signed-by=/etc/apt/trusted.gpg.d/k6.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
-          sudo apt-get install -y k6
+          sudo apt-get install -y k6 nodejs npm
 
-      - name: Run k6 test
+      - name: Install k6-reporter
+        run: |
+          npm install -g k6-reporter
+
+      - name: Run k6 test and generate HTML report
         run: |
           mkdir -p site/k6
           mkdir -p k6/results
           k6 run --out json=k6/results/output.json k6/users_test.js
-          cp k6/results/output.json site/k6/results.json
+          k6-reporter --input k6/results/output.json --output site/k6/index.html
 
       # --- Upload artifacts for GitHub Pages ---
       - name: Upload reports
