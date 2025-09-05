@@ -36,7 +36,7 @@ jobs:
       - name: Generate k6 HTML report
         run: |
           pip install pandas matplotlib
-          python k6/parse_results.py
+          python k6/results/parse_results.py
           mkdir -p site/k6
           mv k6/results/report.html site/k6/index.html
 
