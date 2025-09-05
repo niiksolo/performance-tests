@@ -40,7 +40,6 @@ jobs:
           mkdir -p site/k6
           mv k6/results/report.html site/k6/index.html
 
-      # --- Upload site artifact ---
       - name: Upload reports
         uses: actions/upload-pages-artifact@v3
         with:
