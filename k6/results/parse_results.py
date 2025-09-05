@@ -3,9 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
+import os
+
+# --- Пути к файлам ---
+base_dir = os.path.dirname(__file__)  # папка, где лежит этот скрипт
+input_file = os.path.join(base_dir, "output.json")
+output_file = os.path.join(base_dir, "report.html")
 
 # --- Загружаем данные ---
-with open("output.json", "r", encoding="utf-8") as f:
+with open(input_file, "r", encoding="utf-8") as f:
     data = [json.loads(line) for line in f]
 
 df = pd.json_normalize(data)
@@ -68,7 +74,7 @@ html = f"""
 </html>
 """
 
-with open("report.html", "w", encoding="utf-8") as f:
+with open(output_file, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Отчёт создан: report.html")
+print(f"✅ Отчёт создан: {output_file}")
