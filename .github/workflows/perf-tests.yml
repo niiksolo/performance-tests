@@ -33,18 +33,12 @@ jobs:
           curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/k6.gpg
           echo "deb [signed-by=/etc/apt/trusted.gpg.d/k6.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
-          sudo apt-get install -y k6 nodejs npm
+          sudo apt-get install -y k6
 
-      - name: Install k6-reporter
-        run: |
-          npm install -g k6-reporter
-
-      - name: Run k6 test and generate HTML report
+      - name: Run k6 test (HTML report built-in)
         run: |
           mkdir -p site/k6
-          mkdir -p k6/results
-          k6 run --out json=k6/results/output.json k6/users_test.js
-          k6-reporter --input k6/results/output.json --output site/k6/index.html
+          k6 run k6/users_test.js
 
       # --- Upload artifacts for GitHub Pages ---
       - name: Upload reports
