@@ -9,24 +9,28 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
+      # --- Checkout ---
       - uses: actions/checkout@v4
 
-      # --- JMeter ---
-      - name: Install JMeter (latest)
+      # --- Install JMeter ---
+      - name: Install JMeter 5.6.3
         run: |
           wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
           tar -xvzf apache-jmeter-5.6.3.tgz
           mv apache-jmeter-5.6.3 /opt/jmeter
-          sudo ln -s /opt/jmeter/bin/jmeter /usr/local/bin/jmeter
+          sudo ln -sf /opt/jmeter/bin/jmeter /usr/local/bin/jmeter
 
+      # --- Run JMeter test (fixed loop) ---
       - name: Run JMeter test
         run: |
           mkdir -p site/jmeter
+          # Запускаем с loop=1 вместо -1 (бесконечный)
+          sed -i 's/<stringProp name="LoopController.loops">-1/<stringProp name="LoopController.loops">1/' jmeter/users_test.jmx
           jmeter -n -t jmeter/users_test.jmx \
             -l jmeter/results.jtl \
             -e -o site/jmeter
 
-      # --- k6 ---
+      # --- Install k6 ---
       - name: Install k6
         run: |
           sudo gpg -k || true
@@ -35,12 +39,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y k6
 
-      - name: Run k6 test (HTML report built-in)
+      # --- Run k6 test ---
+      - name: Run k6 test
         run: |
           mkdir -p site/k6
           k6 run k6/users_test.js
 
-      # --- Upload artifacts for GitHub Pages ---
+      # --- Upload reports to GitHub Pages ---
       - name: Upload reports
         uses: actions/upload-pages-artifact@v3
         with:
@@ -54,4 +59,4 @@ jobs:
       id-token: write
     steps:
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4uses: actions/deploy-pages@v4
