@@ -11,23 +11,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- Install JMeter ---
-      - name: Install JMeter (latest)
+      # --- JMeter ---
+      - name: Install JMeter
         run: |
           wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz
           tar -xvzf apache-jmeter-5.6.3.tgz
           mv apache-jmeter-5.6.3 /opt/jmeter
           sudo ln -s /opt/jmeter/bin/jmeter /usr/local/bin/jmeter
 
-      # --- Run JMeter test ---
       - name: Run JMeter test
         run: |
           mkdir -p site/jmeter
           jmeter -n -t jmeter/users_test.jmx \
-            -l site/jmeter/results.jtl \
+            -l jmeter/results.jtl \
             -e -o site/jmeter
 
-      # --- Install k6 ---
+      # --- k6 ---
       - name: Install k6
         run: |
           sudo gpg -k || true
@@ -36,13 +35,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y k6
 
-      # --- Run k6 test ---
-      - name: Run k6 test (HTML report built-in)
+      - name: Run k6 test
         run: |
           mkdir -p site/k6
           k6 run k6/users_test.js
 
-      # --- Upload artifacts for GitHub Pages ---
+      # --- Upload reports ---
       - name: Upload reports
         uses: actions/upload-pages-artifact@v3
         with:
