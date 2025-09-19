@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- JMeter ---
+
       - name: Install JMeter
         run: |
           wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz
@@ -26,7 +26,7 @@ jobs:
             -l jmeter/results.jtl \
             -e -o site/jmeter
 
-      # --- k6 ---
+
       - name: Install k6
         run: |
           sudo gpg -k || true
@@ -40,7 +40,7 @@ jobs:
           mkdir -p site/k6
           k6 run k6/users_test.js
 
-      # --- Upload reports ---
+
       - name: Upload reports
         uses: actions/upload-pages-artifact@v3
         with:
