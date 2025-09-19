@@ -42,6 +42,20 @@
           <stringProp name="HTTPSampler.response_timeout">10000</stringProp>
         </HTTPSamplerProxy>
         <hashTree>
+          <!-- HTTP Header Manager -->
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="Content-Type" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <elementProp name="Accept" elementType="Header">
+                <stringProp name="Header.name">Accept</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
           <!-- Response Assertion -->
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Check 200 OK" enabled="true">
             <collectionProp name="Asserion.test_strings">
@@ -49,8 +63,10 @@
             </collectionProp>
             <stringProp name="Assertion.test_field">Response Code</stringProp>
             <boolProp name="Assertion.assume_success">false</boolProp>
-            <intProp name="Assertion.test_type">2</intProp>
+            <!-- Equals instead of Contains -->
+            <intProp name="Assertion.test_type">8</intProp>
           </ResponseAssertion>
+          <hashTree/>
         </hashTree>
       </hashTree>
     </hashTree>
